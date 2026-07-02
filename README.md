@@ -36,6 +36,7 @@
 
 ## 项目结构
 
+```text
 word-path-puzzle/
 ├── public/ # 静态资源
 ├── src/
@@ -65,7 +66,7 @@ word-path-puzzle/
 ├── docker-compose.yml
 ├── nginx.conf
 └── README.md
-
+```
 
 ## 快速开始
 
@@ -73,7 +74,7 @@ word-path-puzzle/
 
 ```bash
 # 克隆仓库
-git clone <your-repo-url>
+git clone https://github.com/HYaline320/word-path-puzzle.git
 cd word-path-puzzle
 
 # 安装依赖
