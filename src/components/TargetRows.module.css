@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  font-family: monospace;
+  font-size: 1.2rem;
+}
+.matched {
+  background: #c8e6c9;
+  padding: 2px 8px;
+  margin-right: 2px;
+  border-radius: 3px;
+}
+.spacer {
+  display: inline-block;
+  width: 1.2em;       /* 与字符宽度一致 */
+  margin-right: 2px;
+  visibility: hidden; /* 透明占位，但保留空间 */
+}
+.remainingChar {
+  margin-right: 2px;
+  background: #fff9c4;
+  padding: 2px 8px;
+  border-radius: 3px;
+}

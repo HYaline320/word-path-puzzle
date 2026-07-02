@@ -1,122 +1,139 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useMemo, useState } from 'react';
+import { useGame } from './game/useGame';
+import BoardGrid from './components/BoardGrid';
+import TargetRows from './components/TargetRows';
+import AnswerBar from './components/AnswerBar';
+import ControlPanel from './components/ControlPanel';
+import Settings from './components/Settings';
+import GameInstructions from './components/GameInstructions';
+import type { Restriction, DifficultyParams } from './core/types';
+import { DIFFICULTY_PRESETS } from './game/config';
+import styles from './App.module.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [params, setParams] = useState<DifficultyParams>(DIFFICULTY_PRESETS.easy);
+  const { state, selectCell, hint, reset, newGame } = useGame(params);
+  const [showSettings, setShowSettings] = useState(false);
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
+
+  const handleApplySettings = (newParams: DifficultyParams) => {
+    setParams(newParams);
+    newGame(newParams);
+    setShowSettings(false);
+  };
+
+  const handleNewGame = () => {
+    setShowSettings(true);
+  };
+
+  const highlightCells = useMemo(() => {
+    const set = new Set<string>();
+    if (state.status !== 'playing' || state.restriction === null) return set;
+    const { restriction, restrictedIndex, board } = state;
+    if (restriction === 'row') {
+      for (let c = 0; c < board.length; c++) {
+        if (board[restrictedIndex!][c] !== null) set.add(`${restrictedIndex}-${c}`);
+      }
+    } else {
+      for (let r = 0; r < board.length; r++) {
+        if (board[r][restrictedIndex!] !== null) set.add(`${r}-${restrictedIndex}`);
+      }
+    }
+    return set;
+  }, [state]);
+
+  const lowlightCells = useMemo(() => {
+    const set = new Set<string>();
+    if (!hoveredCell || !highlightCells.has(hoveredCell)) return set;
+    const [r, c] = hoveredCell.split('-').map(Number);
+    const { restriction, board } = state;
+    const nextRestriction: Restriction = restriction === 'row' ? 'col' : 'row';
+    const nextIndex = restriction === 'row' ? c : r;
+    if (nextRestriction === 'row') {
+      for (let col = 0; col < board.length; col++) {
+        if (board[nextIndex][col] !== null && !highlightCells.has(`${nextIndex}-${col}`)) {
+          set.add(`${nextIndex}-${col}`);
+        }
+      }
+    } else {
+      for (let row = 0; row < board.length; row++) {
+        if (board[row][nextIndex] !== null && !highlightCells.has(`${row}-${nextIndex}`)) {
+          set.add(`${row}-${nextIndex}`);
+        }
+      }
+    }
+    return set;
+  }, [hoveredCell, highlightCells, state]);
+
+  const handleHint = () => {
+    const move = hint();
+    if (move) {
+      // 将提示坐标存入临时状态，让 BoardGrid 高亮（或闪烁）
+      setHoveredCell(`${move.row}-${move.col}`);
+      // 3秒后清除提示高亮
+      setTimeout(() => setHoveredCell(null), 3000);
+    } else {
+      alert('无可用提示');
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className={styles.app}>
+      <h1 className={styles.title}>Word Path Puzzle</h1>
 
-      <div className="ticks"></div>
+      <GameInstructions />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      <div className={styles.gameLayout}>
+        {/* 左侧棋盘 */}
+        <div className={styles.boardSection}>
+          <BoardGrid
+            state={state}
+            onCellClick={(r, c) => {
+              const err = selectCell(r, c);
+              if (err) alert(err);
+            }}
+            highlightCells={highlightCells}
+            lowlightCells={lowlightCells}
+            onCellHover={(r, c) => setHoveredCell(`${r}-${c}`)}
+            onCellLeave={() => setHoveredCell(null)}
+            hoveredCell={hoveredCell}
+          />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* 右侧面板 */}
+        <div className={styles.rightPanel}>
+          <div className={styles.targetSection}>
+            <h3>目标字符</h3>
+            <TargetRows state={state} />
+          </div>
+          <div className={styles.answerSection}>
+            <h3>答案数组</h3>
+            <AnswerBar state={state} />
+          </div>
+          <div className={styles.controls}>
+            <ControlPanel
+              onHint={handleHint}
+              onReset={reset}
+              onNewGame={handleNewGame}
+              status={state.status}
+            />
+          </div>
+          {state.status !== 'playing' && (
+            <div className={styles.statusMessage}>
+              {state.status === 'won' ? '🎉 恭喜通关！' : `❌ 失败：${state.failReason}`}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showSettings && (
+        <Settings
+          onApply={handleApplySettings}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

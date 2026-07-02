@@ -1,0 +1,28 @@
+.container {
+  margin: 12px 0;
+  text-align: center;
+}
+.toggle {
+  background: #e0e0e0;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.content {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: left;
+  max-width: 500px;
+  margin: 12px auto 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 0.9rem;
+}
+.content ol {
+  padding-left: 20px;
+}
+.content li {
+  margin-bottom: 6px;
+}

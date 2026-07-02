@@ -1,0 +1,35 @@
+.grid {
+  display: grid;
+  gap: 4px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 1.4rem;     /* 增大字体 */
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cell:hover {
+  background: #e0e0e0;
+}
+.selected {
+  background: #aaa;
+  color: white;
+  cursor: not-allowed;
+}
+.highlight {
+  background: #a5d6a5;
+}
+.lowlight {
+  background: #e8f5e9;
+}
+.hovered {
+  box-shadow: 0 0 0 3px #ff9800;
+}
